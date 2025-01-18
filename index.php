@@ -1,70 +1,5 @@
 <?php
-include 'koneksi.php';
-
-// Proses form jika ada data yang dikirim
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $nama_mhs = $_POST['nama_mhs'];
-  $alamat = $_POST['alamat'];
-  $no_hp = $_POST['no_hp'];
-  $tgl_lahir = $_POST['tgl_lahir'];
-  $asal_sklh = $_POST['asal_sklh'];
-  $agama = $_POST['agama'];
-  $jk = $_POST['jk'];
-  
-  // Menangani file upload
-  $target_dir = "file/"; // Pastikan folder ini ada dan memiliki izin yang benar
-  $target_file = $target_dir . basename($_FILES["uploaded_file"]["name"]);
-  $uploadOk = 1;
-  $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-
-  // Cek apakah file sudah ada
-  if (file_exists($target_file)) {
-    echo "<script>alert('Maaf, file sudah ada.');</script>";
-    $uploadOk = 0;
-  }
-
-  // Cek ukuran file (misalnya, maksimum 5MB)
-  if ($_FILES["uploaded_file"]["size"] > 5000000) {
-    echo "<script>alert('Maaf, ukuran file terlalu besar.');</script>";
-    $uploadOk = 0;
-  }
-
-  // Cek format file
-  $allowed_types = ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'];
-  if (!in_array($fileType, $allowed_types)) {
-    echo "<script>alert('Maaf, hanya file JPG, JPEG, PNG, PDF, DOC, dan DOCX yang diperbolehkan.');</script>";
-    $uploadOk = 0;
-  }
-
-  // Jika semua cek berhasil, coba untuk mengupload file
-  if ($uploadOk == 1) {
-    if (move_uploaded_file($_FILES["uploaded_file"]["tmp_name"], $target_file)) {
-      // Menyiapkan dan mengikat
-      $stmt = $conn->prepare("INSERT INTO pendaftaran (nama_mhs, alamat, no_hp, tgl_lahir, asal_sklh, agama, jk, uploaded_file) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-      
-      // Cek apakah prepare berhasil
-      if ($stmt === false) {
-        die("Error preparing statement: " . $conn->error);
-      }
-
-      $stmt->bind_param("ssssssss", $nama_mhs, $alamat, $no_hp, $tgl_lahir, $asal_sklh, $agama, $jk, $target_file);
-
-      // Eksekusi statement
-      if ($stmt->execute()) {
-        echo "<script>alert('File berhasil disimpan!');</script>";
-      } else {
-        echo "<script>alert('Error: " . $stmt->error . "');</script>";
-      }
-
-      // Menutup statement
-      $stmt->close();
-    } else {
-      echo "<script>alert('Maaf, terjadi kesalahan saat mengupload file.');</script>";
-    }
-  }
-}
-
-$conn->close();
+// include 'koneksi.php';
 ?>
 
 <!DOCTYPE html>
@@ -426,38 +361,38 @@ $conn->close();
         </div>
       </section>
 
-              <!--Formulir Pendaftaran-->
-              <section class="registration-section"  id="registration">
-                <h2 class="section-titlep">Registration</h2>
-                <form action="" method="POST" enctype="multipart/form-data" class="registration-form">
-                  <input type="text" name="nama_mhs" placeholder="Nama Calon Mahasiswa" class="form-input" required />
-                  <input type="text" name="alamat" placeholder="Alamat Lengkap" class="form-input" required />
-                  <input type="tel" name="no_hp" placeholder="Nomor Telepon atau HP" class="form-input" required />
-                  <input type="date" name="tgl_lahir" placeholder="Tanggal Lahir" class="form-input" required />
-                  <input type="text" name="asal_sklh" placeholder="Asal Sekolah" class="form-input" required />
-                  <select name="agama" class="form-input" required>
-                    <option value="" disabled selected>Pilih Agama</option>
-                    <option value="Islam">Islam</option>
-                    <option value="Kristen">Kristen</option>
-                    <option value="Katolik">Katolik</option>
-                    <option value="Hindu">Hindu</option>
-                    <option value="Budha">Budha</option>
-                    <option value="Konghucu">Konghucu</option>
-                    <option value="Lainnya">Lainnya</option>
-                  </select>
-                  <div class="form-gender">
-                    <label for="jenis_kelamin">Jenis Kelamin:</label><br />
-                    <input type="radio" name="jk" value="Laki-laki" required /> Laki-laki
-                    <input type="radio" name="jk" value="Perempuan" required /> Perempuan
-                  </div>
-                  <div class="form-photo">
-                    <label for="uploaded_file">Unggah File Nilai Rapot :</label><br />
-                    <input type="file" name="uploaded_file"  class="form-input" required />
-                  </div>
-                  <br />
-                  <button type="submit" class="submit-button">Kirim Pendaftaran</button>
-                </form>
-              </section>
+      <!--Formulir Pendaftaran-->
+      <section class="registration-section"  id="registration">
+        <h2 class="section-titlep">Registration</h2>
+        <form action="submit.php" method="POST" enctype="multipart/form-data" class="registration-form">
+          <input type="text" name="nama_mhs" placeholder="Nama Calon Mahasiswa" class="form-input" required />
+          <input type="text" name="alamat" placeholder="Alamat Lengkap" class="form-input" required />
+          <input type="tel" name="no_hp" placeholder="Nomor Telepon atau HP" class="form-input" required />
+          <input type="date" name="tgl_lahir" placeholder="Tanggal Lahir" class="form-input" required />
+          <input type="text" name="asal_sklh" placeholder="Asal Sekolah" class="form-input" required />
+          <select name="agama" class="form-input" required>
+            <option value="" disabled selected>Pilih Agama</option>
+            <option value="Islam">Islam</option>
+            <option value="Kristen">Kristen</option>
+            <option value="Katolik">Katolik</option>
+            <option value="Hindu">Hindu</option>
+            <option value="Budha">Budha</option>
+            <option value="Konghucu">Konghucu</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+          <div class="form-gender">
+            <label for="jenis_kelamin">Jenis Kelamin:</label><br />
+            <input type="radio" name="jk" value="Laki-laki" required /> Laki-laki
+            <input type="radio" name="jk" value="Perempuan" required /> Perempuan
+          </div>
+          <div class="form-photo">
+            <label for="uploaded_file">Unggah File Nilai Rapot :</label><br />
+            <input type="file" name="file"  class="form-input" required />
+          </div>
+          <br />
+          <button type="submit" class="submit-button">Kirim Pendaftaran</button>
+        </form>
+      </section>
 
       <!--Contact Section-->
       <section class="contact-section" id="contact">

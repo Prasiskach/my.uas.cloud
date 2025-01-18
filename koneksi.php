@@ -1,14 +1,21 @@
 <?php
-$host = "localhost"; // Ganti dengan host database Anda jika berbeda
-$username = "root"; // Ganti dengan username database Anda
-$password = ""; // Ganti dengan password database Anda
-$database = "administrasi"; // Nama database
+$host = '';  //Sesuaikan dengan alamat IP Publik SQL Cloud
+$user = 'root';      
+$password = '';     
+$db_name = 'administrasi'; 
+$charset = 'utf8mb4';
 
-// Membuat koneksi
-$conn = new mysqli($host, $username, $password, $database);
+$dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+    PDO::ATTR_TIMEOUT            => 30,
+];
 
-// Memeriksa koneksi
-if ($conn->connect_error) {
-    die("Koneksi gagal: " . $conn->connect_error);
+try {
+    $pdo = new PDO($dsn, $user, $password, $options);
+} catch (\PDOException $e) {
+    throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
 ?>
