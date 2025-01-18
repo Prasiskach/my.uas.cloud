@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ]);
 
     // Tentukan nama bucket
-    $bucketName = 'GANTI DENGAN NAMA BUCKET';
+    $bucketName = 'GANTI DENGAN NAMA BUCKET'; //sesuaikan dengan nama bucket storage
 
     // Dapatkan referensi ke bucket
     $bucket = $storage->bucket($bucketName);

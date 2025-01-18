@@ -1,8 +1,8 @@
 <?php
 $host = '';  //Sesuaikan dengan alamat IP Publik SQL Cloud
 $user = 'root';      
-$password = '';     
-$db_name = 'administrasi'; 
+$password = ''; //Sesuaikan dengan password yang digunakan
+$db_name = 'administrasi'; //Sesuaikan dengan nama database
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
