@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $jk = sanitize_input($_POST['jk']);
 
     // Konfigurasi AWS S3
-    $bucket_name = "kampyus-bucket ";
+    $bucket_name = "kampyus-bucket";
     $region = "US East (N. Virginia) us-east-1"; 
 
     try {
