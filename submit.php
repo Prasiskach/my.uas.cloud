@@ -70,12 +70,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             throw new Exception("File is not readable");
         }
 
-        // Upload file ke S3 menggunakan 'Body' dan bukan 'SourceFile'
+        // Upload file ke S3 menggunakan 
         $result = $s3->putObject([
             'Bucket' => $bucket_name,
             'Key' => $unique_file_name,
-            'Body' => fopen($file_tmp, 'rb'), // Pastikan file dibuka dalam mode binary
-            'ACL' => 'public-read' 
+            'Body' => fopen($file_tmp, 'rb'),
         ]);
 
         // URL file di S3
