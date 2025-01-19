@@ -57,8 +57,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'version' => 'latest',
             'region' => $region,
             'credentials' => [
-                'key' => '', 
-                'secret' => '' 
+                'key' => 'AKIAYQNJSKGETTSF2FI2', 
+                'secret' => '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' 
             ]
         ]);
 
