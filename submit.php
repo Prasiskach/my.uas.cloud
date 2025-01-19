@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Konfigurasi AWS S3
     $bucket_name = "kampyus-bucket";
-    $region = "US East (N. Virginia) us-east-1"; 
+    $region = "us-east-1"; 
 
     try {
         // Buat instance S3 Client
