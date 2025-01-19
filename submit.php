@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+require 'vendor/autoload.php'; // Load AWS SDK
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
+
 // Fungsi untuk menghindari XSS dengan sanitasi input
 function sanitize_input($data) {
     return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
@@ -16,21 +20,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $agama = sanitize_input($_POST['agama']);
     $jk = sanitize_input($_POST['jk']);
 
-    
     // Validasi file upload
     $file_name = $_FILES['file']['name'];
     $file_tmp = $_FILES['file']['tmp_name'];
     $file_size = $_FILES['file']['size'];
     $file_error = $_FILES['file']['error'];
 
-    // Pastikan file ada (jika tidak, beri pesan error)
     if (empty($file_name)) {
         $_SESSION['error_message'] = "Please attach a file.";
         header("Location: index.php?status=error");
         exit();
     }
 
-    // Validasi ekstensi file
     $allowed_extensions = ['jpg', 'jpeg', 'png', 'pdf'];
     $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
 
@@ -40,79 +41,71 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // Validasi ukuran file (maks 5MB)
     if ($file_size > 5 * 1024 * 1024) {
         $_SESSION['error_message'] = "File size exceeds the limit!";
         header("Location: index.php?status=error");
         exit();
     }
 
-    // Buat nama file unik
-    $unique_file_name = uniqid() . '_' . $file_name;
+    // Konfigurasi AWS S3
+    $bucket_name = "kampyus-bucket ";
+    $region = "US East (N. Virginia) us-east-1"; 
 
-    // Include Google Cloud Storage SDK
-    require 'vendor/autoload.php'; 
-
-    // Path ke kredensial service account
-    $keyFilePath = '/var/www/html/key.json';
-
-    // Membuat instansi client untuk Google Cloud Storage
-    $storage = new \Google\Cloud\Storage\StorageClient([
-        'keyFilePath' => $keyFilePath
-    ]);
-
-    // Tentukan nama bucket
-    $bucketName = 'GANTI DENGAN NAMA BUCKET'; //sesuaikan dengan nama bucket storage
-
-    // Dapatkan referensi ke bucket
-    $bucket = $storage->bucket($bucketName);
-
-    // Upload file ke bucket
     try {
-        $object = $bucket->upload(
-            fopen($file_tmp, 'r'),
-            [
-                'name' => 'images/' . $unique_file_name  
+        // Buat instance S3 Client
+        $s3 = new S3Client([
+            'version' => 'latest',
+            'region' => $region,
+            'credentials' => [
+                'key' => 'AKIAYQNJSKGETTSF2FI2', 
+                'secret' => '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' 
             ]
-        );
+        ]);
 
-        // Ambil URL file yang diupload
-        $file_url = $object->info()['mediaLink'];
+        // Buat nama file unik untuk di-upload
+        $unique_file_name = uniqid() . '_' . $file_name;
+
+        // Upload file ke S3
+        $result = $s3->putObject([
+            'Bucket' => $bucket_name,
+            'Key' => $unique_file_name,
+            'SourceFile' => $file_tmp,
+            'ACL' => 'public-read' 
+        ]);
+
+        // URL file di S3
+        $file_url = $result['ObjectURL'];
 
         // Koneksi ke database
         include('koneksi.php');
 
-        try {
-            // Masukkan data ke database
-            $stmt = $pdo->prepare("INSERT INTO orders (nama_mhs, alamat, no_hp, tgl_lahir, asal_sklh, agama, jk, file_name, file_path) 
-                                   VALUES (:nama_mhs, :alamat, :no_hp, :tgl_lahir, :asal_sklh, :agama, :jk, :file_name, :file_path)");
+        // Simpan data ke database
+        $stmt = $pdo->prepare("INSERT INTO orders (nama_mhs, alamat, no_hp, tgl_lahir, asal_sklh, agama, jk, file_name, file_path) 
+                               VALUES (:nama_mhs, :alamat, :no_hp, :tgl_lahir, :asal_sklh, :agama, :jk, :file_name, :file_path)");
 
-            $stmt->execute([
-                ':nama_mhs' => $nama_mhs,
-                ':alamat' => $alamat,
-                ':no_hp' => $no_hp,
-                ':tgl_lahir' => $tgl_lahir,
-                ':asal_sklh' => $asal_sklh,
-                ':agama' => $agama,
-                ':jk' => $jk,
-                ':file_name' => $unique_file_name,
-                ':file_path' => $file_url  
-            ]);
+        $stmt->execute([
+            ':nama_mhs' => $nama_mhs,
+            ':alamat' => $alamat,
+            ':no_hp' => $no_hp,
+            ':tgl_lahir' => $tgl_lahir,
+            ':asal_sklh' => $asal_sklh,
+            ':agama' => $agama,
+            ':jk' => $jk,
+            ':file_name' => $unique_file_name,
+            ':file_path' => $file_url
+        ]);
 
-            // Pesan sukses
-            $_SESSION['success_message'] = "Your message has been successfully sent!";
-            header("Location: index.php?status=success");
-            exit();
-        } catch (PDOException $e) {
-            $error_message = "There was an error sending your message.";
-            error_log("Error inserting data: " . $e->getMessage());
-            $_SESSION['error_message'] = $error_message;
-            header("Location: index.php?status=error");
-            exit();
-        }
+        // Pesan sukses
+        $_SESSION['success_message'] = "Your message has been successfully sent!";
+        header("Location: index.php?status=success");
+        exit();
 
-    } catch (Exception $e) {
-        $_SESSION['error_message'] = "Error uploading file to Google Cloud Storage: " . $e->getMessage();
+    } catch (AwsException $e) {
+        $_SESSION['error_message'] = "Error uploading file to S3: " . $e->getMessage();
+        header("Location: index.php?status=error");
+        exit();
+    } catch (PDOException $e) {
+        $_SESSION['error_message'] = "Error inserting data into database: " . $e->getMessage();
         header("Location: index.php?status=error");
         exit();
     }
