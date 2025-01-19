@@ -104,13 +104,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['error_message'] = "Error uploading file to S3: " . $e->getMessage();
         // Alert dengan pesan error
         echo "<script>alert('Error uploading file to S3: " . $e->getMessage() . "');</script>";
-        header("Location: index.php?status=error");
         exit();
     } catch (PDOException $e) {
         $_SESSION['error_message'] = "Error inserting data into database: " . $e->getMessage();
         // Alert dengan pesan error
         echo "<script>alert('Error inserting data into database: " . $e->getMessage() . "');</script>";
-        header("Location: index.php?status=error");
         exit();
     }
     
