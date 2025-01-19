@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         include('koneksi.php');
 
         // Simpan data ke database
-        $stmt = $pdo->prepare("INSERT INTO orders (nama_mhs, alamat, no_hp, tgl_lahir, asal_sklh, agama, jk, file_name, file_path) 
+        $stmt = $pdo->prepare("INSERT INTO pendaftaran (nama_mhs, alamat, no_hp, tgl_lahir, asal_sklh, agama, jk, file_name, file_path) 
                                VALUES (:nama_mhs, :alamat, :no_hp, :tgl_lahir, :asal_sklh, :agama, :jk, :file_name, :file_path)");
 
         $stmt->execute([
