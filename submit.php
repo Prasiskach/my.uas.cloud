@@ -65,11 +65,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Buat nama file unik untuk di-upload
         $unique_file_name = uniqid() . '_' . $file_name;
 
-        // Upload file ke S3
+        // Pastikan file bisa dibaca
+        if (!is_readable($file_tmp)) {
+            throw new Exception("File is not readable");
+        }
+
+        // Upload file ke S3 menggunakan 'Body' dan bukan 'SourceFile'
         $result = $s3->putObject([
             'Bucket' => $bucket_name,
             'Key' => $unique_file_name,
-            'SourceFile' => $file_tmp,
+            'Body' => fopen($file_tmp, 'rb'), // Pastikan file dibuka dalam mode binary
             'ACL' => 'public-read' 
         ]);
 
@@ -102,15 +107,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     } catch (AwsException $e) {
         $_SESSION['error_message'] = "Error uploading file to S3: " . $e->getMessage();
-        // Alert dengan pesan error
+        // Debugging lebih lanjut
+        error_log("AWS S3 Error: " . $e->getMessage());
         header("Location: index.php?status=error-upload-file");
         exit();
     } catch (PDOException $e) {
         $_SESSION['error_message'] = "Error inserting data into database: " . $e->getMessage();
-        // Alert dengan pesan error
+        error_log("PDO Error: " . $e->getMessage());
         header("Location: index.php?status=error-insert-data");
         exit();
+    } catch (Exception $e) {
+        $_SESSION['error_message'] = "General error: " . $e->getMessage();
+        error_log("General Error: " . $e->getMessage());
+        header("Location: index.php?status=error-general");
+        exit();
     }
-    
 }
 ?>
