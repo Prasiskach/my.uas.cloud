@@ -25,35 +25,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $region = "US East (N. Virginia) us-east-1"; 
 
     try {
-        // Buat instance S3 Client
-        $s3 = new S3Client([
-            'version' => 'latest',
-            'region' => $region,
-            'credentials' => [
-                'key' => 'AKIAYQNJSKGETTSF2FI2', 
-                'secret' => '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' 
-            ]
-        ]);
-
-        // Buat nama file unik untuk di-upload
-        $unique_file_name = uniqid() . '_' . $file_name;
-
-        // Upload file ke S3
-        $result = $s3->putObject([
-            'Bucket' => $bucket_name,
-            'Key' => $unique_file_name,
-            'SourceFile' => $file_tmp,
-            'ACL' => 'public-read' 
-        ]);
-
-        // URL file di S3
-        $file_url = $result['ObjectURL'];
-
         // Koneksi ke database
         include('koneksi.php');
 
         // Simpan data ke database
-        $stmt = $pdo->prepare("INSERT INTO orders (nama_mhs, alamat, no_hp, tgl_lahir, asal_sklh, agama, jk, file_name, file_path) 
+        $stmt = $pdo->prepare("INSERT INTO orders (nama_mhs, alamat, no_hp, tgl_lahir, asal_sklh, agama, jk) 
                                VALUES (:nama_mhs, :alamat, :no_hp, :tgl_lahir, :asal_sklh, :agama, :jk)");
 
         $stmt->execute([
