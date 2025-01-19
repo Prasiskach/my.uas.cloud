@@ -1,5 +1,9 @@
 <?php
-// include 'koneksi.php';
+include 'koneksi.php';
+if (isset($_SESSION['error_message'])) {
+  echo "<script>alert('" . $_SESSION['error_message'] . "');</script>";
+  unset($_SESSION['error_message']);
+}
 ?>
 
 <!DOCTYPE html>
