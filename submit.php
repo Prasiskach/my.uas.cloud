@@ -20,17 +20,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $agama = sanitize_input($_POST['agama']);
     $jk = sanitize_input($_POST['jk']);
 
+    // Validasi file upload
+    $file_name = $_FILES['file']['name'];
+    $file_tmp = $_FILES['file']['tmp_name'];
+    $file_size = $_FILES['file']['size'];
+    $file_error = $_FILES['file']['error'];
+
+    if (empty($file_name)) {
+        $_SESSION['error_message'] = "Please attach a file.";
+        header("Location: index.php?status=error");
+        exit();
+    }
+
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'pdf'];
+    $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+    if (!in_array($file_ext, $allowed_extensions)) {
+        $_SESSION['error_message'] = "File type not allowed!";
+        header("Location: index.php?status=error");
+        exit();
+    }
+
+    if ($file_size > 5 * 1024 * 1024) {
+        $_SESSION['error_message'] = "File size exceeds the limit!";
+        header("Location: index.php?status=error");
+        exit();
+    }
+
     // Konfigurasi AWS S3
     $bucket_name = "kampyus-bucket";
     $region = "US East (N. Virginia) us-east-1"; 
 
     try {
+        // Buat instance S3 Client
+        $s3 = new S3Client([
+            'version' => 'latest',
+            'region' => $region,
+            'credentials' => [
+                'key' => 'AKIAYQNJSKGETTSF2FI2', 
+                'secret' => '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' 
+            ]
+        ]);
+
+        // Buat nama file unik untuk di-upload
+        $unique_file_name = uniqid() . '_' . $file_name;
+
+        // Upload file ke S3
+        $result = $s3->putObject([
+            'Bucket' => $bucket_name,
+            'Key' => $unique_file_name,
+            'SourceFile' => $file_tmp,
+            'ACL' => 'public-read' 
+        ]);
+
+        // URL file di S3
+        $file_url = $result['ObjectURL'];
+
         // Koneksi ke database
         include('koneksi.php');
 
         // Simpan data ke database
-        $stmt = $pdo->prepare("INSERT INTO orders (nama_mhs, alamat, no_hp, tgl_lahir, asal_sklh, agama, jk) 
-                               VALUES (:nama_mhs, :alamat, :no_hp, :tgl_lahir, :asal_sklh, :agama, :jk)");
+        $stmt = $pdo->prepare("INSERT INTO orders (nama_mhs, alamat, no_hp, tgl_lahir, asal_sklh, agama, jk, file_name, file_path) 
+                               VALUES (:nama_mhs, :alamat, :no_hp, :tgl_lahir, :asal_sklh, :agama, :jk, :file_name, :file_path)");
 
         $stmt->execute([
             ':nama_mhs' => $nama_mhs,
@@ -40,6 +91,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             ':asal_sklh' => $asal_sklh,
             ':agama' => $agama,
             ':jk' => $jk,
+            ':file_name' => $unique_file_name,
+            ':file_path' => $file_url
         ]);
 
         // Pesan sukses
@@ -47,6 +100,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: index.php?status=success");
         exit();
 
+    } catch (AwsException $e) {
+        $_SESSION['error_message'] = "Error uploading file to S3: " . $e->getMessage();
+        // Alert dengan pesan error
+        header("Location: index.php?status=error-upload-file");
+        exit();
     } catch (PDOException $e) {
         $_SESSION['error_message'] = "Error inserting data into database: " . $e->getMessage();
         // Alert dengan pesan error

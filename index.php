@@ -389,6 +389,10 @@ if (isset($_SESSION['error_message'])) {
             <input type="radio" name="jk" value="Laki-laki" required /> Laki-laki
             <input type="radio" name="jk" value="Perempuan" required /> Perempuan
           </div>
+          <div class="form-photo">
+            <label for="uploaded_file">Unggah File Nilai Rapot :</label><br />
+            <input type="file" name="file"  class="form-input" required />
+          </div>
           <br />
           <button type="submit" class="submit-button">Kirim Pendaftaran</button>
         </form>
