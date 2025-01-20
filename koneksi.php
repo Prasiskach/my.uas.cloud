@@ -1,7 +1,7 @@
 <?php
 $host = '127.0.0.1';  
 $user = 'root';      
-$password = ''; 
+$password = 'Batanta71'; 
 $db_name = 'administrasi'; 
 $charset = 'utf8mb4';
 
