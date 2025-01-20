@@ -1,5 +1,5 @@
 <?php
-$host = 'database-1.cluster-c52gqk4oa45c.us-east-1.rds.amazonaws.com';  
+$host = 'database-2.cluster-c52gqk4oa45c.us-east-1.rds.amazonaws.com';  
 $user = 'admin';      
 $password = 'Batanta71'; 
 $db_name = 'administrasi'; 
