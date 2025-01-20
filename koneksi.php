@@ -1,6 +1,6 @@
 <?php
-$host = 'database-2.cluster-c52gqk4oa45c.us-east-1.rds.amazonaws.com';  
-$user = 'dbkampyus';      
+$host = 'ip-172-31-25-119';  
+$user = 'root';      
 $password = 'Batanta71'; 
 $db_name = 'administrasi'; 
 $charset = 'utf8mb4';
