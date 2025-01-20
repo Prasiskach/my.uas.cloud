@@ -1,5 +1,5 @@
 <?php
-$host = 'ip-172-31-25-119';  
+$host = 'localhost';  
 $user = 'root';      
 $password = 'Batanta71'; 
 $db_name = 'administrasi'; 
